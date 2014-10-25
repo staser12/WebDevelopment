@@ -1,0 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>MyBlog: {{ id }}</title>
+</head>
+<body>
+{% include "header_messages.html" %}
+    <h1>Blog title: {{ title }}</h1>
+    <p>Id: {{ id }}</p>
+    <p>Content: {{ content }}</p>
+    <p>Publication date: {{ pub_date }}</p>
+    <p>Blog version: {{ version }}</p>
+    <form action="/editblog/{{ id }}/" method="get">
+    <input type="submit" value="Edit">
+    </form>
+{% include "footer.html" %}
+</body>
+</html>

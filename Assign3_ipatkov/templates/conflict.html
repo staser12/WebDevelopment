@@ -1,0 +1,30 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>MyBlog: {{ id }}</title>
+</head>
+<body>
+   <h1>{{ title }}</h1>
+   The article has been modified while you were editing it.
+
+   <h2>Current version</h2>
+   <p>{{ content }}</p>
+
+   <h2>Your version</h2>
+
+   <p>{{ user_content}}</p>
+
+   <h2>New version</h2>
+   Please combine the current version and your version into a new article
+    <form action="/editblog/{{ id }}" method="post">
+    {% csrf_token %}
+    <input type="text" value="{{ title }}" name="title"/>
+    <textarea name="content" cols="80" rows="30">{{ content }}</textarea>
+    <input type="hidden" name="edited_version" value="{{ edited_version }}"/>
+    <input type="hidden" name="pub_date" value="{{ pub_date }}"/>
+    <input type="submit" value="Save">
+  </form>
+{% include "footer.html" %}
+</body>
+</html>

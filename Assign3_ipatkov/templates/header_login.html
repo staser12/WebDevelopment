@@ -1,0 +1,10 @@
+<div>
+    <p>
+        <form id="login" method="post">
+        <label>Username<input type="text" value="{{username}}" name="username"/></label>
+        <label>Password<input type="password" value="{{ password }}" name="password"/></label>
+        <input type="submit" value="Login"/>
+        {% csrf_token %}
+        </form>
+    </p>
+</div>

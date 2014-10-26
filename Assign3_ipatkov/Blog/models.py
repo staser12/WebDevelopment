@@ -1,10 +1,11 @@
+import datetime
 from django.db import models
 
 
 class MyBlog(models.Model):
     title= models.CharField(max_length=30)
     content = models.TextField()
-    pub_date=models.DateTimeField()
+    pub_date=models.DateTimeField(default=datetime.datetime.now())
     version=models.IntegerField(default=0)
 
 
@@ -19,3 +20,4 @@ class MyBlog(models.Model):
 
     def __unicode__(self):
         return self.title
+

@@ -1,5 +1,5 @@
 from django.conf.urls import patterns, include, url
-
+from Blog.rest_views import *
 from django.contrib import admin
 admin.autodiscover()
 
@@ -17,6 +17,9 @@ urlpatterns = patterns('',
     url(r'^createuser/','Blog.views.create_user'),
     url(r'^login/','Blog.views.login'),
     url(r'^logout/','Blog.views.logout'),
+    
+    url(r'^api/v2/blogs/$', blog_list),
+    url(r'^api/v2/blogs/(?P<pk>[0-9]+)/$', blog_detail),
 
     url(r'^admin/', include(admin.site.urls)),
 )

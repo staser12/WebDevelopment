@@ -1,6 +1,8 @@
+import re
 from django.contrib.auth.models import User
 from django.contrib.messages import get_messages
 from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
 
 import datetime
 
@@ -60,15 +62,7 @@ def show_home(request):
         request.session.flush()
         return HttpResponseRedirect('/myblog/')
     elif request.method=="POST" and request.POST.has_key('username'):
-        username=request.POST.get('username','')
-        password=request.POST.get('password','')
-        user=auth.authenticate(username=username,password=password)
-        if user is not None and user.is_active:
-            auth.login(request,user)
-            return HttpResponseRedirect('/myblog/')
-        else:
-            messages.error(request,"Username or password doesn't match")
-            return HttpResponseRedirect('/myblog/')
+        login(request)
 
     elif request.method=="GET" and 'logout' in request.GET:
         auth.logout(request)
@@ -92,27 +86,28 @@ def show_home(request):
     except IOError:
         return HttpResponse("Something went wrong")
 
-
+@login_required
 def add_blog(request):
-    blog=MyBlog()
-    if request.method=='POST' and request.POST.has_key('content'):
-        blog.content=request.POST['content']
-        blog.pub_date = datetime.datetime.now()
-        blog.title=request.POST['title'].strip()
-        blog.version=1
-        blog.save()
-        counter(request)
-        creates=request.session.get('creates')
-        request.session['creates']=creates+1
-
-        messages.success(request,"Blog entry added successfully")
-        return HttpResponseRedirect('/myblog/')
+    if not request.user.is_authenticated():
+        return HttpResponseRedirect('/login/?next=%s' % request.path)
     else:
-       #d=counter(request)
-        #session_start,visits,edits,creates,deletes=d['session_start'],d['visits'],d['edits'],d['creates'],d['deletes']
-        return render(request,'addblog.html')
+        blog=MyBlog()
+        if request.method=='POST' and request.POST.has_key('content'):
+            blog.content=request.POST['content']
+            blog.pub_date = datetime.datetime.now()
+            blog.title=request.POST['title'].strip()
+            blog.version=1
+            blog.save()
+            counter(request)
+            creates=request.session.get('creates')
+            request.session['creates']=creates+1
 
+            messages.success(request,"Blog entry added successfully")
+            return HttpResponseRedirect('/myblog/')
+        else:
+            return render(request,'addblog.html')
 
+@login_required
 def edit_blog(request,id):
     if MyBlog.exists(id):
         #find an existing entry
@@ -178,6 +173,7 @@ def show_blog(request,id):
                            'version':blog.version}))
     return HttpResponse(html)
 
+@login_required
 def delete_blog(request,id):
     if MyBlog.exists(id):
         blog=MyBlog.getById(id)
@@ -188,5 +184,30 @@ def delete_blog(request,id):
     else:
         messages.error(request, 'Blog with id = '+str(id)+' not found.')
     return HttpResponseRedirect("/myblog/")
-
-
+def login(request):
+    if request.method=="POST" and request.POST.has_key('username'):
+        username=request.POST.get('username','')
+        password=request.POST.get('password','')
+        nextSite=request.GET.get('next','/myblog/')
+        user=auth.authenticate(username=username,password=password)
+        if user is not None:
+            if user.is_active:
+                auth.login(request,user)
+                return HttpResponseRedirect(nextSite)
+            else:
+                messages.error(request,"Your account is disabled")
+                return HttpResponseRedirect('/myblog/')
+        else:
+            messages.error(request,"Username or password doesn't match")
+            return HttpResponseRedirect('/myblog/')
+    else:
+        messages.error(request,"Please Sign in")
+        messages1=get_messages(request)
+        if re.match(r'^/myblog/$',request.path):
+            return HttpResponseRedirect('/myblog/')
+        else:
+            return render_to_response("login.html",{'messages':messages1},context_instance=RequestContext(request))
+    return render_to_response("login.html",{},context_instance=RequestContext(request))
+def logout(request):
+    auth.logout(request)
+    return HttpResponseRedirect('/myblog/')

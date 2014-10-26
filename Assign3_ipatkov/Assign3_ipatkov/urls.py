@@ -15,6 +15,8 @@ urlpatterns = patterns('',
     url(r'^addblog/$','Blog.views.add_blog'),#valmis
     url(r'^deleteblog/(?P<id>\w+)/$','Blog.views.delete_blog'),
     url(r'^createuser/','Blog.views.create_user'),
+    url(r'^login/','Blog.views.login'),
+    url(r'^logout/','Blog.views.logout'),
 
     url(r'^admin/', include(admin.site.urls)),
 )
